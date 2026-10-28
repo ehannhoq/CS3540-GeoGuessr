@@ -1,0 +1,20 @@
+Python virtual environment
+
+venv/
+
+Dataset images
+
+data/
+
+Python cache files
+
+pycache/
+*.py[cod]
+
+macOS
+
+.DS_Store
+
+IDE settings
+
+.vscode/
