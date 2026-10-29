@@ -13,7 +13,7 @@ class CountryDataset(Dataset):
             if not os.path.isdir(os.path.join(path, country)):
                 continue
 
-            for image_name in os.listdir(f'data/{country}'):
+            for image_name in os.listdir(os.path.join(path, country)):
                 if not os.path.join(path, country, image_name).endswith('.jpg'):
                     continue
                 
