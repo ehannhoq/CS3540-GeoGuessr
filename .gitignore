@@ -5,3 +5,5 @@ pycache/
 macOS
 .DS_Store
 .vscode/**/.DS_Store
+.env
+dataset_files.json
