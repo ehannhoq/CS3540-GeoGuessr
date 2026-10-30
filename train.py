@@ -7,9 +7,9 @@ from torch.utils.data import DataLoader, Subset
 
 
 DATA_PATH = 'data/'
-max_epochs = 50
+max_epochs = 100
 batch_size = 32
-validation_split = 0.2
+validation_split = 0.3
 
 
 def split_dataset(dataset):
