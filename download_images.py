@@ -1,48 +1,44 @@
-import csv
-import io
 import json
 import random
-import re
-import subprocess
 import time
 import zipfile
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from kaggle.api.kaggle_api_extended import KaggleApi
+
 DATASET = "ubitquitin/geolocation-geoguessr-images-50k"
 COUNTRIES = ["United States", "Japan", "Malaysia", "Ghana"]
-IMAGES_PER_COUNTRY = 100
+IMAGES_PER_COUNTRY = 500
 
 OUTPUT_DIR = Path("data")
 CACHE_FILE = Path("dataset_files.json")
 
+api = KaggleApi()
 
-def run_kaggle(args, retries=5):
-    """Run Kaggle CLI with retries for rate limits."""
+
+def run_kaggle(function, *args, retries=5, **kwargs):
     for attempt in range(retries):
-        result = subprocess.run(
-            ["kaggle", *args],
-            capture_output=True,
-            text=True,
-        )
+        try:
+            return function(*args, **kwargs)
+        except Exception as error:
+            message = str(error)
 
-        if result.returncode == 0:
-            return result.stdout
+            if "429" in message or "Too Many Requests" in message:
+                wait = min(60 * (attempt + 1), 300)
+                print(f"Rate limited. Waiting {wait} seconds...")
+                time.sleep(wait)
+                continue
 
-        message = result.stderr + result.stdout
-
-        if "429" in message or "Too Many Requests" in message:
-            wait = min(60 * (attempt + 1), 300)
-            print(f"Rate limited. Waiting {wait} seconds...")
-            time.sleep(wait)
-            continue
-
-        raise RuntimeError(message)
+            raise
 
     raise RuntimeError("Kaggle rate limit persisted after retries.")
 
 
 def get_all_files():
-    """Retrieve and cache the complete paginated file listing."""
     if CACHE_FILE.exists():
         with open(CACHE_FILE, "r") as f:
             cache = json.load(f)
@@ -60,40 +56,24 @@ def get_all_files():
     token = cache.get("page_token")
 
     while True:
-        args = [
-            "datasets", "files", DATASET,
-            "--page-size", "200",
-            "--csv",
-        ]
-
-        if token:
-            args += ["--page-token", token]
-
         print(f"Retrieving page; {len(files)} files collected...")
 
-        output = run_kaggle(args)
-
-        match = re.search(r"Next Page Token\s*=\s*(\S+)", output)
-        next_token = match.group(1) if match else None
-
-        lines = output.splitlines()
-        header = next(
-            (
-                i for i, line in enumerate(lines)
-                if line.strip().lower().startswith("name,")
-            ),
-            None,
+        result = run_kaggle(
+            api.dataset_list_files,
+            DATASET,
+            page_token=token,
+            page_size=200,
         )
 
-        if header is None:
-            raise RuntimeError(
-                "Could not parse Kaggle CSV output:\n" + output[:1000]
-            )
+        next_token = (
+            getattr(result, "next_page_token", None)
+            or getattr(result, "nextPageToken", None)
+            or None
+        )
 
-        reader = csv.DictReader(io.StringIO("\n".join(lines[header:])))
         page_files = [
-            row["name"] for row in reader
-            if row.get("name")
+            entry.name for entry in result.files # type: ignore
+            if entry.name # type: ignore
         ]
 
         files.extend(page_files)
@@ -119,15 +99,14 @@ def get_all_files():
 
 
 def download_file(filename, destination):
-    """Download an individual dataset file."""
-    run_kaggle([
-        "datasets", "download",
-        "-d", DATASET,
-        "-f", filename,
-        "-p", str(destination),
-    ])
+    run_kaggle(
+        api.dataset_download_file,
+        DATASET,
+        filename,
+        path=str(destination),
+        quiet=True,
+    )
 
-    # Kaggle may package individual downloads as ZIP files.
     expected_name = Path(filename).name
     downloaded_zip = destination / f"{expected_name}.zip"
 
@@ -140,6 +119,8 @@ def download_file(filename, destination):
 
 
 def main():
+    api.authenticate()
+
     files = get_all_files()
     print(f"\nTotal filenames collected: {len(files)}")
 
