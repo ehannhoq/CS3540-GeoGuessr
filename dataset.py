@@ -13,11 +13,11 @@ class CountryDataset(Dataset):
             if not os.path.isdir(os.path.join(path, country)):
                 continue
 
-            for image_name in os.listdir(os.path.join(path, country)):
+            for image_name in os.listdir(os.path.join(path, country, 'compressed_dataset', country)):  # When downloading from Kaggle, the data directory follows this structure.
                 if not os.path.join(path, country, image_name).endswith('.jpg'):
                     continue
-                
-                self.data.append((self.__country_to_arr__(country), os.path.join(path, country, image_name)))
+
+                self.data.append((self.__country_to_arr__(country), os.path.join(path, country, 'compressed_dataset', country, image_name)))
                 
 
     def __len__(self):
@@ -52,4 +52,5 @@ class CountryDataset(Dataset):
 
 if __name__ == '__main__':
     dataset = CountryDataset('data/')
+    dataset.__getitem__(1)
 
