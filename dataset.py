@@ -37,20 +37,9 @@ class CountryDataset(Dataset):
 
 
     def __country_to_arr__(self, country):
-        if country == 'Ghana':
-            return np.array([1.0, 0.0, 0.0, 0.0])
-
+        if country == 'Brazil':
+            return np.array([1.0, 0.0, 0.0])
         if country == 'Japan':
-            return np.array([0.0, 1.0, 0.0, 0.0])
-
-        if country == 'Malaysia':
-            return np.array([0.0, 0.0, 1.0, 0.0])
-
+            return np.array([0.0, 1.0, 0.0])
         if country == 'United States':
-            return np.array([0.0, 0.0, 0.0, 1.0])
-
-
-if __name__ == '__main__':
-    dataset = CountryDataset('data/')
-    dataset.__getitem__(1)
-
+            return np.array([0.0, 0.0, 1.0])

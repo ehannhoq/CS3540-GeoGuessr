@@ -8,38 +8,35 @@ import cv2
 import torch
 
 
-def get_random_imagepath(path = 'data/'):
-    rand_country = rand.choice(os.listdir(os.path.join(path)))
+def get_random_imagepath(path = 'data/test'):
+    rand_country = rand.choice(os.listdir(path))
     while not os.path.isdir(os.path.join(path, rand_country)):
-        rand_country = rand.choice(os.listdir(os.path.join(path)))
+        rand_country = rand.choice(os.listdir(path))
 
     rand_image_name = rand.choice(os.listdir(os.path.join(path, rand_country, 'compressed_dataset', rand_country)))
     while not os.path.join(path, rand_country, 'compressed_dataset', rand_country, rand_image_name).endswith('.jpg'):
         rand_image_name = rand.choice(os.listdir(os.path.join(path, rand_country, 'compressed_dataset', rand_country)))
-        
-    return os.path.join(path, rand_country, 'compressed_dataset', rand_image_name)
+
+    return os.path.join(path, rand_country, 'compressed_dataset', rand_country, rand_image_name)
 
 
 def evaluate(model, n):
-    datapath = 'data/'
+    datapath = 'data/test'
 
     results = {
         'predictions': {
-            'ghana': 0.0,
+            'brazil': 0.0,
             'japan': 0.0,
-            'malaysia': 0.0,
             'united_states': 0.0,
         },
         'ground_truth': {
-            'ghana': 0.0,
+            'brazil': 0.0,
             'japan': 0.0,
-            'malaysia': 0.0,
             'united_states': 0.0,
         },
         'true_positives': {
-            'ghana': 0.0,
+            'brazil': 0.0,
             'japan': 0.0,
-            'malaysia': 0.0,
             'united_states': 0.0,
         }
     }
@@ -94,7 +91,7 @@ def evaluate(model, n):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--image', type=str)
-    parser.add_argument('--eval', type=int, default=1)
+    parser.add_argument('--eval', type=int, default=None)
     args = parser.parse_args()
 
     model = get_model()

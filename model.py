@@ -18,15 +18,14 @@ def get_model():
         nn.Dropout(0.3),
         nn.Linear(model.fc.in_features, 256),
         nn.Sigmoid(),
-        nn.Linear(256, 4)
+        nn.Linear(256, 3),
     )
     return model
 
 
 def parse_prediction(prediction):
     return {
-        'ghana': prediction[0],
+        'brazil': prediction[0],
         'japan': prediction[1],
-        'malaysia': prediction[2],
-        'united_states': prediction[3],
+        'united_states': prediction[2],
     }

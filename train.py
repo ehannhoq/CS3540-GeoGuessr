@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Subset
 
 
-DATA_PATH = 'data/'
+DATA_PATH = 'data/train'
 max_epochs = 100
 batch_size = 32
 validation_split = 0.3

@@ -12,10 +12,10 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 
 DATASET = "ubitquitin/geolocation-geoguessr-images-50k"
 
-COUNTRIES = ["United States", "Japan", "Malaysia", "Ghana"]
+COUNTRIES = ["Brazil, Japan, United States"]
 
-IMAGES_PER_COUNTRY = 500
-TRAIN_RATIO = 0.75
+IMAGES_PER_COUNTRY = 1000
+TRAIN_RATIO = 0.80
 RANDOM_SEED = 42
 
 OUTPUT_DIR = Path("data")
@@ -84,8 +84,8 @@ def get_all_files():
         )
 
         page_files = [
-            entry.name for entry in result.files
-            if entry.name
+            entry.name for entry in result.files # type: ignore
+            if entry.name # type: ignore
         ]
 
         files.extend(page_files)
